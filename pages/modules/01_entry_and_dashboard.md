@@ -35,7 +35,7 @@ Untuk mengakses sistem Happy Farmers, Anda harus memiliki akun Admin aktif yang 
 ### 4. Gambaran Umum Dasbor
 Dasbor utama berfungsi sebagai pusat intelijen untuk seluruh operasi Happy Farmers.
 
-![Dasbor – Kondisi Awal Saat Dimuat](/assets/dashboard-initial.png)
+![Dasbor – Kondisi Awal Saat Dimuat](./assets/dashboard-initial.png)
 
 Dasbor dibagi ke dalam beberapa zona analitik:
 - Bilah Navigasi Utama (kiri)
@@ -60,8 +60,8 @@ Dasbor dibagi ke dalam beberapa zona analitik:
   - *Aturan Validasi 1*: Jika bidang dibiarkan kosong lalu formulir dikirim, sistem akan menampilkan peringatan: "Silakan lengkapi email dan kata sandi Anda."
   - *Aturan Validasi 2*: Jika server menolak akses akibat kredensial salah, akan muncul boks peringatan merah: "Login gagal. Silakan coba lagi."
 - **Tangkapan Layar**:
-  - `[🖼️ SCREENSHOT: Login – State Form Kosong]`
-  - `[🖼️ SCREENSHOT: Login – Peringatan Validasi]`
+  - ![Login – State Form Kosong](./assets/login-empty.png)
+  - ![Login – Peringatan Validasi](./assets/login-error.png)
 
 #### Modul: Dasbor
 - **Nama Fitur**: Metrik & Tren Eksekutif
@@ -77,8 +77,8 @@ Dasbor dibagi ke dalam beberapa zona analitik:
 - **Perilaku Responsif**:
   > [!NOTE] Mobile: Jika diakses melalui layar kecil smartphone, tata letaknya akan memadat secara dinamis. Dari tampilan blok yang bersebelahan beralih ke wujud vertikal dalam satu lajur menurun.
 - **Tangkapan Layar**:
-  - `[🖼️ SCREENSHOT: Dasbor – Tampilan Default 30 Hari]`
-  - `[🖼️ SCREENSHOT: Dasbor – Pemilihan Filter Rentang Waktu 90 Hari]`
+  - ![Dasbor – Tampilan Default 30 Hari](./assets/dashboard-30days.png)
+  - ![Dasbor – Pemilihan Filter Rentang Waktu 90 Hari](./assets/dashboard-90days.png)
 
 ---
 

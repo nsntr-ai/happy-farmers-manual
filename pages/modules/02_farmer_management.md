@@ -59,9 +59,9 @@ Volume ini berfokus pada salah satu tiang penyangga utama sistem Happy Farmers: 
   - *Aturan Validasi 1*: Jika NIK terdeteksi mengandung alfabet atau jumlahnya irasional, pemberitahuan kesalahan validasi wajib-isi dari borang sistem seketika nyala.
   - *Aturan Validasi 2*: Mengeklik "Simpan" kala kolom sentral seperti 'Nama Lengkap' dibiarkan sunyi akan menginterupsi *request*, mencetak gelembung interupsi "Gagal Menyimpan Data Petani".
 - **Tangkapan Layar**:
-  - `[🖼️ SCREENSHOT: Farmers – Halaman Daftar Petani]`
-  - `[🖼️ SCREENSHOT: Farmers – Formulir Tambah Petani Kosong]`
-  - `[🖼️ SCREENSHOT: Farmers – Formulir Validasi (Gagal/Error)]`
+  - ![Farmers – Halaman Daftar Petani](./assets/farmers-list.png)
+  - ![Farmers – Formulir Tambah Petani Kosong](./assets/farmers-add-empty.png)
+  - ![Farmers – Formulir Validasi (Gagal/Error)](./assets/farmers-add-error.png)
 
 ---
 

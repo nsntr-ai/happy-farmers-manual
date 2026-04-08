@@ -71,7 +71,7 @@ Create a comprehensive manual using GitHub Flavored Markdown. Adhere strictly to
 > Include this section only if the application has a central dashboard view. Skip if the application uses a different landing pattern (e.g., direct module access, a feed view).
 
 - Main layout explanation (Navigation bars, sidebars, main content areas).
-- **Screenshot rule:** Include one placeholder using the format `[🖼️ SCREENSHOT: Dashboard – Initial Load State]`.
+- **Screenshot rule:** Include one screenshot linking to `./assets/dashboard-initial.png` or similar.
 
 ### 5. Features & Modules
 Document EACH module from the provided outline or source code. Process one module at a time.
@@ -81,7 +81,7 @@ For each module:
 - **Step-by-step usage** (Numbered lists reflecting exact user actions: clicking, typing, navigating).
 - **Required Inputs:** Infer from forms or NestJS DTO validation rules. For each form, list at least 2 common validation errors as plain-language solutions.
 - **Role-gated UI:** If a feature or element is only visible to certain roles, note it with a `> [!NOTE] Visible to: [Role]` callout.
-- **Screenshots:** Add placeholders using the standard format `[🖼️ SCREENSHOT: {Module} – {State/Action}]`.
+- **Screenshots:** Ensure every necessary state has a real screenshot taken. Format them as `![{Module} – {State/Action}](./assets/{filename}.png)`.
   - Minimum coverage per module: see Depth Calibration table above.
 - **Callouts:** Use `> [!TIP]`, `> [!NOTE]`, or `> [!WARNING]` to highlight caveats (e.g., file size limits, required roles).
 - **Responsive behavior:** If the layout or interaction changes on smaller screens (tablet/mobile), note it with:
@@ -94,7 +94,7 @@ For each module:
 
 **Per-module completion checklist** (verify all items before moving to the next module):
 - [ ] All forms documented with fields and validation rules
-- [ ] Screenshot placeholders placed for each key state (per Depth Calibration)
+- [ ] Real screenshots captured and linked via relative paths (per Depth Calibration)
 - [ ] Role-gated elements marked with `> [!NOTE] Visible to: [Role]`
 - [ ] Mermaid workflow created (Section 6)
 - [ ] FAQ entries added (per Depth Calibration minimum)
@@ -131,17 +131,28 @@ Define domain-specific terms, abbreviations, and application-specific vocabulary
 
 ---
 
-# Screenshot Naming Convention
-All screenshot placeholders must follow this format consistently:
+# Automated Screenshot Capture & Integration
 
-```
-[🖼️ SCREENSHOT: {Module} – {State/Action}]
-```
+When documenting a module, you must orchestrate capturing actual screenshots instead of purely using text placeholders.
 
-Examples:
-- `[🖼️ SCREENSHOT: Login – Empty Form State]`
-- `[🖼️ SCREENSHOT: Orders – Create Order Form Validation Error]`
-- `[🖼️ SCREENSHOT: Dashboard – Sidebar Navigation Expanded]`
+**Follow these steps to autonomously capture and integrate screenshots:**
+
+1. **Markdown Formatting**: Inside the `.md` file, use standard Markdown image tags pointing to a local relative path, placed beneath the appropriate step:
+   `![{Module} – {State/Action}](./assets/{filename-lowercase}.png)`
+   Example: `![Login – Empty Form State](./assets/login-empty.png)`
+
+2. **Automated Capture (Puppeteer)**: Write and execute a Node.js script using `puppeteer` to automatically grab the screenshots directly from the local development server (e.g., `localhost:3004`).
+   - Create a script folder (e.g., `scripts/screenshot-script`) and `npm install puppeteer sharp`.
+   - Write a sequence that logs in using user-provided credentials, navigates to the target URLs (like `/farmers/create`), interacts with the UI to produce proper states (e.g., clicking 'Submit' with empty inputs to trigger validation messages in red), and captures the screen.
+   - *Remember to write logic to dismiss any floating guidance modals or pop-ups that might block interaction.*
+
+3. **Compression (< 200KB Requirement)**: Use the `sharp` library in your Node execution to immediately compress the screenshot buffers before saving.
+   - Example: `.resize(1024).png({ quality: 40, colors: 128, force: true })` or `.jpeg({ quality: 60 })`.
+   - The file size MUST be strictly under 200 KB per image.
+   
+4. **Placement**: Save the compressed images to the respective module's `assets/` directory (e.g., `happy-farmer-manual/pages/modules/assets/`). This matches the `./assets/` prefix used in step 1.
+
+Never leave the `[🖼️ SCREENSHOT:]` text blobs as the final delivery. Always attempt to provide the real images if the Next.js server is available!
 
 ---
 
