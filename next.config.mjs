@@ -11,5 +11,6 @@ export default withNextra({
   assetPrefix: '/happy-farmers-manual/',
   images: {
     unoptimized: true
-  }
+  },
+  trailingSlash: true
 });
