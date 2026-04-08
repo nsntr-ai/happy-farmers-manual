@@ -35,7 +35,7 @@ Untuk mengakses sistem Happy Farmers, Anda harus memiliki akun Admin aktif yang 
 ### 4. Gambaran Umum Dasbor
 Dasbor utama berfungsi sebagai pusat intelijen untuk seluruh operasi Happy Farmers.
 
-`![Dasbor – Kondisi Awal Saat Dimuat](/happy-farmers-manual/assets/dashboard-initial.png)`
+![Dasbor – Kondisi Awal Saat Dimuat](/assets/dashboard-initial.png)
 
 Dasbor dibagi ke dalam beberapa zona analitik:
 - Bilah Navigasi Utama (kiri)
