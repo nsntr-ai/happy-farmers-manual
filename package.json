@@ -22,5 +22,12 @@
   "homepage": "https://github.com/nsntr-ai/happy-farmers-manual#readme",
   "devDependencies": {
     "gh-pages": "^6.3.0"
+  },
+  "dependencies": {
+    "next": "^16.2.2",
+    "nextra": "^4.6.1",
+    "nextra-theme-docs": "^4.6.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   }
 }
