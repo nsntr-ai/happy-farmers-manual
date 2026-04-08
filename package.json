@@ -1,0 +1,26 @@
+{
+  "name": "happy-farmer-manual",
+  "version": "1.0.0",
+  "description": "Repositori ini menyimpan dokumen panduan resmi untuk aplikasi Happy Farmers.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "deploy": "next build && touch out/.nojekyll && gh-pages -d out -u \"github-actions-bot <support+actions@github.com>\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nsntr-ai/happy-farmers-manual.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nsntr-ai/happy-farmers-manual/issues"
+  },
+  "homepage": "https://github.com/nsntr-ai/happy-farmers-manual#readme",
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
+  }
+}
