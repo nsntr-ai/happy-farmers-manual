@@ -1,148 +1,277 @@
 # Happy Farmers: Documentation Outline
 
+### Document control (this outline)
+
+| Property | Value |
+|----------|--------|
+| Outline version | **v2.0** |
+| Last aligned to codebase | **2026-04-13** — route inventory checked against `fe-hf-nextjs/src/app/(modules)/**/page.tsx` |
+| Purpose | Single reference for **what** to document, **in what order**, and **which app routes** each manual chapter owns. |
+| Audience | Technical writers / implementers generating manuals under `happy-farmer-manual/pages/`. |
+
+**v2.0 changes:** Added manual-to-chapter mapping, explicit coverage of all top-level `(modules)` route segments, maintenance rules, and a full **Route segment inventory** appendix so the outline stays usable as the app grows.
+
+---
+
 ### 1. Application Summary
 
 **Happy Farmers** is a comprehensive agricultural resource, supply chain, and farm management system. It is designed to track the entire agricultural lifecycle: from registering farmers and managing their farm plots, planning crop seasons, recording harvests, to processing procurements, managing complex multi-warehouse inventory, tracking product transformations, and facilitating delivery orders.
 
-**Target User Role:**
-- **Admin**: Has full system access (CRUD operations across all modules). This documentation is written exclusively from the perspective of the Admin role.
+**Target user role**
+
+- **Admin:** Full system access (CRUD across modules). Manuals use the **Admin** UX perspective unless a future outline adds other roles.
 
 ---
 
-### 2. Module Inventory
+### 2. Module inventory (chapters ↔ routes ↔ manuals)
 
-| #   | Module Name / Area     | Route / Page                                                            | Target Role(s) | Complexity | Priority | Key Components/Files                     |
-| --- | ---------------------- | ----------------------------------------------------------------------- | -------------- | ---------- | -------- | ---------------------------------------- |
-| 1   | Entry & Onboarding     | `/login`, `/register`                                                   | Admin          | Low        | High     | `src/app/login`, `src/app/register`      |
-| 2   | Dashboard              | `/dashboard`                                                            | Admin          | Medium     | High     | `src/app/(modules)/dashboard`            |
-| 3   | Farmer Management      | `/(modules)/farmers`, `/(modules)/farms`                                | Admin          | High       | High     | `src/app/(modules)/farmers`, `farms`     |
-| 4   | Plot Planning          | `/(modules)/plots`, `plot-seasons`, `plot-plantings`                    | Admin          | High       | High     | `(modules)/plots`, `plot-seasons`        |
-| 5   | Crop & Harvest         | `/(modules)/crops`, `harvests`, `farm-inputs`                           | Admin          | Medium     | High     | `(modules)/harvests`, `crops`            |
-| 6   | Procurement & Sourcing | `/(modules)/procurements`, `collectors`                                 | Admin          | High       | High     | `(modules)/procurements`, `collectors`   |
-| 7   | Global Inventory       | `/(modules)/stocks`, `stock-movements`, `internal-transfer`             | Admin          | High       | High     | `(modules)/stocks`, `stock-movements`    |
-| 8   | Processing (Factory)   | `/(modules)/product-transformation`                                     | Admin          | High       | Medium   | `(modules)/product-transformation`       |
-| 9   | Sales & Fulfillment    | `/(modules)/buyers`, `delivery-orders`                                  | Admin          | Medium     | Medium   | `(modules)/delivery-orders`, `buyers`    |
-| 10  | Traceability           | `/traceability`                                                         | Admin          | Low        | Medium   | `src/app/traceability`                   |
-| 11  | Finance & Reports      | `/(modules)/financial-records`, `reports`                               | Admin          | Medium     | Medium   | `(modules)/financial-records`, `reports` |
-| 12  | Product Master Data    | `/(modules)/products`, `categories`, `variants`, `modifiers`            | Admin          | Medium     | Low      | `(modules)/products` (and related)       |
-| 13  | System & CRM           | `/(modules)/users`, `roles`, `employees`, `company-profile`, `settings` | Admin          | Medium     | Low      | `(modules)/users`, `roles`, `settings`   |
+Use this table as the **authoritative map** when creating or updating user manuals.  
+**Primary routes** are the URLs admins typically open; nested paths (e.g. `/farmers/[id]/farms/create`) belong to the same **#** unless the outline says otherwise.
 
-_(Note: Minor master data routes are grouped into broader conceptual areas for documentation efficiency)._
+| # | Module name / area | Primary routes (Next.js) | Planned manual (VitePress) | Status |
+|---|--------------------|---------------------------|-----------------------------|--------|
+| 1 | Entry & Onboarding | `/login`, `/register` | `pages/modules/01_entry_and_dashboard.md` (login); register when implemented | Partial |
+| 2 | Dashboard | `/dashboard` | Same volume as **1** (header + metrics) | Partial |
+| 3 | Farmer & farm profiles | `/farmers`, `/farms` (incl. nested `farmers/.../farms`, `farmers/.../plots` where applicable) | `pages/modules/02_farmer_management.md` | Draft |
+| 4 | Plot planning & seasons | `/plots`, `/plot-seasons`, `/plot-plantings`, `/seasons`, `/locations` | `pages/modules/03_plot_planning_and_harvest.md` | Draft |
+| 5 | Crops, varieties, inputs & harvest | `/crops`, `/crop-varieties`, `/farm-inputs`, `/harvests` | Same file as **4** today, or split to a dedicated `05_…` when scope grows | Partial |
+| 6 | Procurement & sourcing | `/procurements`, `/collectors` | `pages/modules/04_procurement_and_sourcing.md` | Draft |
+| 7 | Inventory & logistics | `/stocks`, `/stock-movements`, `/internal-transfer`, `/warehouses`, `/stock-locations`, `/stock-groups`, `/accounts` | `pages/modules/05_inventory_and_logistics.md` | Draft |
+| 8 | Processing (factory) | `/product-transformation/...` (templates, transforms) | `pages/modules/06_processing_factory.md` | Draft |
+| 9 | Sales & fulfillment | `/buyers`, `/delivery-orders` | `pages/modules/07_sales_and_fulfillment.md` | Draft |
+| 10 | Traceability | `/traceability` | `pages/modules/08_traceability.md` | Draft |
+| 11 | Finance & reports | `/financial-records`, `/reports/inventory-valuation`, `/reports/cogs` | `pages/modules/09_finance_and_reports.md` | Draft |
+| 12 | Product master data | `/products`, `/categories`, `/product-variants`, `/product-modifiers` | `pages/modules/10_product_master_data.md` | Draft |
+| 13 | People, org & settings | `/users`, `/roles`, `/employees`, `/company-profile`, `/settings/theme`, `/settings/preferences` | `pages/modules/11_people_org_and_settings.md` | Draft |
+| 14 | Audit & integrations | `/audit`, `/webhook-configs` | `pages/modules/12_audit_and_integrations.md` | Draft |
+
+**Notes**
+
+- **Row 4 vs 5:** Production data spans multiple route roots; one manual file is fine until length forces a **Crop & harvest**–only volume.
+- **Deep links:** Screens such as `/stocks/view/[id]/procurement/view/[procurementId]` are documented in **chapter 6 (Procurement)** for the procurement journey and **chapter 7 (Inventory)** for stock context—use cross-links; do not duplicate full workflows in both places.
 
 ---
 
-### 3. Feature Breakdown per Module
+### 3. Feature breakdown per module
 
 #### 1. Entry & Onboarding
 
-- Feature 1: User Login
-- Feature 2: User Registration (not implemented yet for now)
-- Target Role: Admin
-- Key actions: Login
-- Constraints: Authentication must be valid.
+- Feature 1: User login (`/login`).
+- Feature 2: User registration (`/register`) — **skip detailed UX until product implements it**; outline still lists the route for inventory completeness.
+- Target role: Admin.
+- Constraints: Valid authentication.
 
 #### 2. Dashboard
 
-- Feature 1: High-level system statistics
-- Feature 2: Navigation sidebar and header
-- Forms: None (Read-only view)
+- Feature 1: High-level statistics.
+- Feature 2: Primary navigation (sidebar/header).
+- Forms: Read-only.
 
-#### 3. Farmer Management
+#### 3. Farmer & farm profiles
 
-- Feature 1: Farmer Directory (List, Filter, Sort)
-- Feature 2: Farmer Detail View & Registration
-- Feature 3: Farm Profile Management
-- Forms: Create/Edit Farmer Form, Create/Edit Farm boundaries/details
-- Key actions: Create, View Details, Update, Delete
+- Farmer directory (list, filter, sort).
+- Farmer detail, create, edit; nested farms/plots from farmer context where exposed in UI.
+- Farm list and farm detail outside farmer context (`/farms`).
+- Forms: Farmer CRUD, farm CRUD.
 
-#### 4. Plot Planning
+#### 4. Plot planning & seasons
 
-- Feature 1: Define individual plots inside a farm.
-- Feature 2: Assign plot seasons.
-- Feature 3: Record plot plantings (Crop tracking).
-- Forms: Plot Registration, Associate Season, Log Planting.
+- Plots on farms; plot seasons; plot plantings.
+- Supporting reference data: **Seasons**, **Locations** as needed for UI flows.
+- Forms: Plot registration, season association, planting logs.
 
-#### 5. Crop & Harvest
+#### 5. Crops, varieties, inputs & harvest
 
-- Feature 1: Master list of crops and varieties.
-- Feature 2: Farm Input tracking (fertilizers, pesticides).
-- Feature 3: Harvest Entry Logging.
-- Forms: Log Harvest Form (Product, Yield, Quality/Grade, Origin).
-- Constraints: Harvest must be linked to a valid Plot and Farmer.
+- Crop master and crop varieties.
+- Farm inputs (e.g. fertilizers/pesticides).
+- Harvest logging (linkage to plot/farmer as enforced by UI).
 
-#### 6. Procurement & Sourcing
+#### 6. Procurement & sourcing
 
-- Feature 1: Managing collectors (aggregators).
-- Feature 2: Creating and processing Procurement Transactions.
-- Forms: Procurement Entry (Supplier, Items, Prices, Weights).
-- Key actions: Process Payment, Receive Goods into Warehouse.
+- Collectors directory and verification-oriented UI.
+- Procurement list, dashboard tab, create/edit/detail, receipt/stock deep links as present in UI.
+- Key actions: payments and goods receipt **as shown to the user** (wording from UI, not API names).
 
-#### 7. Global Inventory
+#### 7. Inventory & logistics
 
-- Feature 1: Central Stock View (across Warehouses & Locations).
-- Feature 2: Stock Movements logging (In/Out records).
-- Feature 3: Internal Transfers (moving stock between warehouses).
-- Forms: Dispatch Transfer Form, Receive Transfer Form.
+- Stock list and stock detail (incl. embedded views for procurement/transformation/farmer where applicable).
+- Stock movements; internal transfers.
+- Warehouses, stock locations, stock groups; chart-of-accounts style **Accounts** if used for money movement in UI.
 
-#### 8. Processing (Factory)
+#### 8. Processing (factory)
 
-- Feature 1: Product Transformations (Converting raw materials to finished goods).
-- Forms: Work Order / Transformation rule execution.
+- Transformation templates and transform runs under `product-transformation`.
 
-#### 9. Sales & Fulfillment
+#### 9. Sales & fulfillment
 
-- Feature 1: Delivery Orders (shipping goods out to buyers).
-- Feature 2: Buyer Directory.
-- Forms: Generate Delivery Order Form.
+- Buyers; delivery orders (create, edit, view).
+
+#### 10. Traceability
+
+- Standalone traceability experience (`/traceability`).
+
+#### 11. Finance & reports
+
+- Manual: `pages/modules/09_finance_and_reports.md`.
+- Financial records CRUD.
+- Reports: inventory valuation, COGS (paths under `/reports/...`).
+
+#### 12. Product master data
+
+- Manual: `pages/modules/10_product_master_data.md`.
+- Products, categories, product variants, product modifiers.
+
+#### 13. People, org & settings
+
+- Manual: `pages/modules/11_people_org_and_settings.md`.
+- Users, roles, employees, company profile, theme and preferences.
+
+#### 14. Audit & integrations
+
+- Manual: `pages/modules/12_audit_and_integrations.md`.
+- Audit log / timeline UI (`/audit`).
+- Webhook configuration (`/webhook-configs`).
 
 ---
 
-### 4. Shared UI Components
+### 4. Shared UI components
 
-| Component               | Used In Modules               | Description                                                        |
-| ----------------------- | ----------------------------- | ------------------------------------------------------------------ |
-| `PageHeader` (assumed)  | All internal modules          | Standard header with title and breadcrumbs                         |
-| `DataTable` (assumed)   | Farmer, Procurements, Stocks  | Standard table layout with pagination, search, filter              |
-| `StatusBadge` (assumed) | Procurements, Delivery Orders | Color-coded chips for workflow states (Draft, Approved, Completed) |
+| Component | Used in (examples) | Description |
+|-----------|-------------------|-------------|
+| `AppListPageShell` / list toolbars | Collectors, procurements, many index pages | Standard list shell, filters, primary action |
+| `AppFormPageShell` / `AppGenericForm` | Create/edit flows | Form layout, validation summary, save |
+| Tables / grouped tables | Procurements, stocks | Pagination, grouping, row navigation to detail |
+| Status chips / tags | Procurements, delivery orders | Workflow state visualization |
+
+*(Adjust names when auditing components; this row is indicative, not an exhaustive design-system audit.)*
 
 ---
 
-### 5. Cross-Module Dependency Map
+### 5. Cross-module dependency map
 
 ```mermaid
 flowchart TD
-    A([1. Entry]) --> B[2. Dashboard]
-    B -->|Registration| C[3. Farmer Management]
-    C -->|Sub-divide| D[4. Plot Planning]
-    D -->|Cycle| E[5. Crop & Harvest]
+    A([1 Entry]) --> B[2 Dashboard]
+    B --> C[3 Farmers & farms]
+    C --> D[4 Plots & seasons]
+    D --> E[5 Crops & harvest]
 
-    B -->|Sourcing| F[6. Procurement & Sourcing]
-    E -.->|Generates Yield| F
+    B --> F[6 Procurement & collectors]
+    E -.->|Yield / supply| F
 
-    F -->|Goods Receipt| G[(7. Global Inventory)]
-    G <-->|Manufacturing| H[8. Processing Factory]
+    F --> G[(7 Inventory & logistics)]
+    G <-->|Transforms| H[8 Processing]
 
-    G -->|Shipping| I[9. Sales & Fulfillment]
+    G --> I[9 Sales & fulfillment]
+    I --> J[10 Traceability]
+    G --> K[11 Reports & finance]
+
+    C --> L[13 People & settings]
+    G --> L
+    L --> M[14 Audit & integrations]
 ```
 
 ---
 
-### 6. Suggested Documentation Order
+### 6. Suggested documentation order
 
-**Ordering strategy:** **Business Journey (Farm-to-Table)**  
-I recommend documenting the system in the natural flow of the agricultural supply chain, starting from setup and moving through production, sourcing, inventory, and sales.
+**Strategy:** Farm-to-table narrative, then reporting, master data, and platform tools.
 
-1. **Entry & Dashboard** — Entry point for all roles.
-2. **Farmer Management** — The foundational entity.
-3. **Plot Planning & Crop/Harvest** — The agricultural production phase.
-4. **Procurement & Sourcing** — Moving produce from farm to the business.
-5. **Global Inventory & Processing** — Managing what the business owns.
-6. **Sales & Fulfillment** — Moving goods out.
-7. **Traceability & Reports** — Analytics on the completed cycle.
-8. **System Configurations** — Master data setup.
+1. **Entry & dashboard** — Access and orientation.
+2. **Farmers & farms** — Foundational parties and land.
+3. **Plots, seasons, locations** — Field structure.
+4. **Crops, varieties, inputs, harvest** — Production records.
+5. **Procurement & collectors** — Upstream buying.
+6. **Inventory & logistics** — What the organization holds and moves.
+7. **Processing** — Factory transforms.
+8. **Sales & fulfillment** — Downstream shipping.
+9. **Traceability** — Chain visibility (standalone module).
+10. **Finance & reports** — Money and analytical reports.
+11. **Product master data** — SKU/catalog maintenance (often after core ops are documented).
+12. **People, org & settings** — RBAC and branding/preferences.
+13. **Audit & integrations** — Compliance-style views and webhooks.
 
 ---
 
-### 7. Open Items & Pre-Documentation Questions
+### 7. Rules for writers (keep manuals consistent with this outline)
 
-*All role-based questions resolved. Focusing purely on Admin UX.*
+1. **Source of truth for “is there a page?”** — Top-level segments under `fe-hf-nextjs/src/app/(modules)` (see appendix). If a new segment appears, add a row to appendix and assign an **owner #** from section 2.
+2. **One narrative chapter per #** — Prefer one manual file per chapter until size forces a split; then update section 2 with the new filename.
+3. **Nested routes** — Document under the chapter that matches the **user’s primary task**; use internal links for the other chapter.
+4. **Frontend-only** — Manual text describes UI and user-visible outcomes; avoid API/database internals unless needed for a visible error message.
+5. **Outline updates** — Bump **Outline version** in document control when you add/remove a chapter, reassign routes, or change suggested order.
+
+---
+
+### 8. Open items & pre-documentation questions
+
+- Registration UX remains **deferred** until implemented.
+- **Row 4 vs 5 split:** Decide explicitly when `03_plot_planning_and_harvest.md` becomes too long; then add `05_crop_harvest.md` (or similar) and update section 2.
+- *Role-based questions:* Admin-only for now.
+
+---
+
+### Appendix A — Route segment inventory (`(modules)`)
+
+Each **segment** is the first path part under the authenticated module tree (URL `/<segment>/...`). **Owner** refers to the **#** column in section 2.
+
+| Segment | Typical base URL | Owner # |
+|---------|------------------|--------|
+| `accounts` | `/accounts` | 7 |
+| `audit` | `/audit` | 14 |
+| `buyers` | `/buyers` | 9 |
+| `categories` | `/categories` | 12 |
+| `collectors` | `/collectors` | 6 |
+| `company-profile` | `/company-profile` | 13 |
+| `crop-varieties` | `/crop-varieties` | 5 |
+| `crops` | `/crops` | 5 |
+| `dashboard` | `/dashboard` | 2 |
+| `delivery-orders` | `/delivery-orders` | 9 |
+| `employees` | `/employees` | 13 |
+| `farm-inputs` | `/farm-inputs` | 5 |
+| `farmers` | `/farmers` | 3 |
+| `farms` | `/farms` | 3 |
+| `financial-records` | `/financial-records` | 11 |
+| `harvests` | `/harvests` | 5 |
+| `internal-transfer` | `/internal-transfer` | 7 |
+| `locations` | `/locations` | 4 |
+| `plot-plantings` | `/plot-plantings` | 4 |
+| `plot-seasons` | `/plot-seasons` | 4 |
+| `plots` | `/plots` | 4 |
+| `procurements` | `/procurements` | 6 |
+| `product-modifiers` | `/product-modifiers` | 12 |
+| `product-transformation` | `/product-transformation` | 8 |
+| `product-variants` | `/product-variants` | 12 |
+| `products` | `/products` | 12 |
+| `reports` | `/reports/...` | 11 |
+| `roles` | `/roles` | 13 |
+| `seasons` | `/seasons` | 4 |
+| `settings` | `/settings/...` | 13 |
+| `stock-groups` | `/stock-groups` | 7 |
+| `stock-locations` | `/stock-locations` | 7 |
+| `stock-movements` | `/stock-movements` | 7 |
+| `stocks` | `/stocks` | 7 |
+| `users` | `/users` | 13 |
+| `warehouses` | `/warehouses` | 7 |
+| `webhook-configs` | `/webhook-configs` | 14 |
+
+**Routes outside `(modules)`** (still in scope for manuals):
+
+| Path | Owner # |
+|------|--------|
+| `/login`, `/register` | 1 |
+| `/traceability` | 10 |
+| `/` (marketing or redirect — document only if user-facing) | 1 or 2 |
+
+---
+
+### Appendix B — Regenerating the segment list (optional)
+
+From the repository root, you can list current top-level segments with:
+
+```bash
+find fe-hf-nextjs/src/app/\(modules\) -name 'page.tsx' | \
+  sed 's|fe-hf-nextjs/src/app/(modules)/||' | cut -d/ -f1 | sort -u
+```
+
+Reconcile the output with **Appendix A** whenever you add or remove a module.

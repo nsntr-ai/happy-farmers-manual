@@ -21,7 +21,7 @@
 | v1.0 | 2026-04-08 | System AI | Draf awal untuk modul Masuk Admin dan Dasbor pada antarmuka Next.js |
 
 ### 2. Pendahuluan
-Selamat datang di buku panduan sistem Happy Farmers. Volume ini mencakup modul **Masuk (Login) dan Dasbor**. Panduan ini dirancang untuk memberikan langkah-langkah yang diperlukan bagi Administrator Sistem untuk masuk ke dalam sistem secara aman dan memantau metrik rantai pasokan pertanian, tingkat stok, serta tren pengadaan di tingkat makro.
+Selamat datang di buku panduan sistem Happy Farmers. Volume ini mencakup modul **Masuk (Login) dan Dasbor**. Panduan ini dirancang untuk memberikan langkah-langkah yang diperlukan bagi Administrator Sistem untuk masuk ke dalam sistem secara aman dan memantau metrik rantai pasokan pertanian, tingkat stok, serta tren pengadaan di tingkat makro. Pengelolaan **user**, **role**, **karyawan**, **profil perusahaan**, dan **tema** aplikasi dibahas di [Volume 11: Pengguna & Pengaturan](11_people_org_and_settings.md).
 
 ### 3. Memulai
 Untuk mengakses sistem Happy Farmers, Anda harus memiliki akun Admin aktif yang disediakan.
