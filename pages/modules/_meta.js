@@ -10,5 +10,6 @@ export default {
   "09_finance_and_reports": "9. Keuangan & Laporan",
   "10_product_master_data": "10. Master Produk",
   "11_people_org_and_settings": "11. Pengguna & Pengaturan",
-  "12_audit_and_integrations": "12. Audit & Integrasi"
+  "12_audit_and_integrations": "12. Audit & Integrasi",
+  "13_affiliate_program": "13. Program Affiliator"
 }
