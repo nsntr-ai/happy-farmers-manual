@@ -9,6 +9,9 @@
   - [Platform Superadmin — Affiliator](#modul-platform-superadmin--affiliator)
   - [Platform Superadmin — Pembayaran komisi](#modul-platform-superadmin--pembayaran-komisi)
   - [Platform Superadmin — Referral saat onboarding tenant](#modul-platform-superadmin--referral-saat-onboarding-tenant)
+  - [Platform Superadmin — S&K Affiliator](#modul-platform-superadmin--sk-affiliator)
+  - [Portal Affiliator — Persetujuan S&K](#modul-portal-affiliator--persetujuan-sk)
+  - [Halaman publik S&K Affiliator](#modul-halaman-publik-sk-affiliator)
   - [Portal Affiliator — Dashboard](#modul-portal-affiliator--dashboard)
   - [Portal Affiliator — Tenant referral, komisi & pembayaran](#modul-portal-affiliator--tenant-referral-komisi--pembayaran)
   - [Portal Affiliator — Profil & rekening](#modul-portal-affiliator--profil--rekening)
@@ -23,6 +26,8 @@
 | Versi | Tanggal | Penulis | Deskripsi |
 |------|---------|---------|-----------|
 | v1.0 | 2026-09-01 | System AI | Volume **Program Affiliator**: portal mitra, manajemen superadmin, komisi berulang, dan batch pembayaran bulanan |
+| v1.1 | 2026-09-01 | System AI | Menambah **S&K Program Affiliator**: dokumen legal yang dapat diedit, persetujuan pertama kali (scroll + centang + tanda tangan digital), dan tanda tangan ulang saat versi baru dipublikasikan |
+| v1.2 | 2026-09-02 | System AI | Memperluas panduan **S&K Affiliator**: alur admin (draft, pratinjau, publish, versi), gerbang portal affiliator, halaman publik, riwayat tanda tangan, dan FAQ |
 
 ---
 
@@ -58,7 +63,8 @@ Panduan tenant operasional (petani, stok, dll.) ada di volume lain. Volume ini h
 #### Affiliator (mitra)
 1. Masuk di `/login` dengan email dan kata sandi yang diberikan oleh platform saat affiliator didaftarkan.
 2. Setelah berhasil masuk, Anda diarahkan ke **Dashboard Affiliator** (`/affiliate`).
-3. Affiliator **tidak** memiliki akses ke modul tenant (`/dashboard`, `/farmers`, dll.) atau halaman admin platform.
+3. **Login pertama kali** (atau setelah S&K versi baru dipublikasikan): Anda **wajib** membuka `/affiliate/accept-terms`, membaca dokumen sampai akhir, mencentang persetujuan, mengetik nama lengkap, dan membubuhkan tanda tangan digital. Portal tidak dapat diakses sebelum langkah ini selesai.
+4. Affiliator **tidak** memiliki akses ke modul tenant (`/dashboard`, `/farmers`, dll.) atau halaman admin platform.
 
 ---
 
@@ -148,6 +154,114 @@ flowchart LR
 
 ---
 
+#### Modul: Platform Superadmin — S&K Affiliator
+- **Nama fitur**: **Syarat & Ketentuan Program Affiliator**
+- **Rute**: `/admin/legal`, `/admin/legal/create`, `/admin/legal/[id]` (tipe **S&K Program Affiliator**); halaman publik baca-saja `/affiliate-terms`
+- **Deskripsi**: Dokumen legal **terpisah** dari S&K Platform (`/terms`) dan Kebijakan Privasi (`/privacy`). Superadmin mengelola isi dalam format **Markdown**, menyimpan **Draft**, meninjau **pratinjau**, lalu **Publish**. Hanya **satu versi Published** yang berlaku pada satu waktu. Versi lama otomatis **Archived** (tidak dihapus — untuk audit). Affiliator yang menandatangani versi lama **wajib menandatangani ulang** setelah versi baru dipublikasikan.
+
+**Siklus status dokumen**
+
+| Status | Dapat diedit? | Dapat dihapus? | Terlihat oleh affiliator? |
+|--------|---------------|----------------|---------------------------|
+| **Draft** | ✅ Simpan, Preview, Publish | ✅ Hapus draft | ❌ |
+| **Published** | ❌ (baca-saja) | ❌ | ✅ (versi aktif + gerbang portal) |
+| **Archived** | ❌ | ❌ | ❌ (riwayat audit saja) |
+
+**Panduan — membuat S&K pertama kali**
+1. Buka **Dokumen Legal** di sidebar platform (`/admin/legal`).
+2. Klik **Buat Draft**.
+3. **Tipe**: pilih **S&K Program Affiliator**.
+4. **Judul**: mis. `Syarat & Ketentuan Program Affiliator`.
+5. **Konten (Markdown)**: salin isi dari master `be-happy-farmer/prisma/legal/affiliate-terms.md` (atau tulis sendiri). Ganti semua placeholder `[ISI …]` (nama PT, alamat, tanggal efektif, email kontak, forum sengketa, dll.) **sebelum** Publish.
+6. Klik **Simpan Draft** — versi otomatis (mis. v1).
+7. Klik **Preview** untuk melihat tampilan setelah Markdown dirender (heading, daftar, blockquote).
+8. Klik **Edit** untuk kembali ke textarea jika perlu perbaikan.
+9. Klik **Publish**. Sistem memperingatkan bahwa **semua affiliator wajib menandatangani ulang** — ini normal pada publikasi pertama atau setiap versi baru.
+10. Setelah Publish, status menjadi **PUBLISHED**; affiliator yang login akan diarahkan ke `/affiliate/accept-terms` sampai menandatangani.
+
+**Panduan — memperbarui S&K (versi baru)**
+1. Versi **Published** tidak dapat diedit (immutable untuk audit).
+2. Klik **Buat Draft** lagi dengan tipe **S&K Program Affiliator**.
+3. Paste isi yang sudah diperbarui → **Simpan Draft** (mis. v2).
+4. **Preview** → **Publish**.
+5. v1 menjadi **Archived**; v2 menjadi **Published**.
+6. Semua affiliator — termasuk yang sudah menandatangani v1 — **terkunci** dari portal sampai menandatangani v2.
+
+**Panduan — meninjau riwayat tanda tangan affiliator**
+1. Buka **Affiliator** → **Lihat** pada mitra tertentu.
+2. Scroll ke kartu **Riwayat persetujuan S&K**.
+3. Setiap entri menampilkan: **nama penandatangan**, **versi dokumen**, **tanggal**, dan **gambar tanda tangan digital** (PNG).
+4. Versi lama tetap tampil di riwayat meskipun affiliator sudah menandatangani versi terbaru.
+
+**Catatan operasional**
+- Deploy aplikasi **tidak** otomatis mempublikasikan S&K. File `affiliate-terms.md` ikut dalam image, tetapi affiliator membaca konten dari **database** setelah superadmin **Publish** di `/admin/legal`.
+- Jika production tidak menjalankan `db:seed`, superadmin dapat **Buat Draft** manual (copy-paste Markdown) — tidak wajib seed.
+- Jika **belum ada** versi Published, portal affiliator **tetap terbuka** (`documentMissing`) — gerbang S&K hanya aktif setelah ada dokumen Published.
+
+**Tangkapan layar**
+  - ![Dokumen Legal — Daftar](./assets/affiliate-admin-legal-list.png)
+  - ![Dokumen Legal — Draft & pratinjau S&K](./assets/affiliate-admin-legal-detail.png)
+  - ![Affiliator — Riwayat persetujuan S&K](./assets/affiliate-admin-terms-history.png)
+
+---
+
+#### Modul: Portal Affiliator — Persetujuan S&K
+- **Nama fitur**: **Persetujuan Syarat & Ketentuan**
+- **Rute**: `/affiliate/accept-terms` (gerbang wajib); setelah disetujui, portal `/affiliate/*` terbuka
+- **Deskripsi**: Sebelum affiliator dapat melihat kode referral, komisi, atau pembayaran, sistem memverifikasi bahwa versi **Published** terbaru sudah dibaca dan ditandatangani. Aturan yang sama juga ditegakkan di **API** (`403 AFFILIATE_TERMS_REQUIRED`) — navigasi manual ke URL portal tidak dapat melewati gerbang.
+
+**Kapan affiliator diarahkan ke halaman ini?**
+- **Login pertama** setelah S&K dipublikasikan.
+- **Setelah superadmin Publish versi baru** — tanda tangan versi lama tidak lagi valid untuk versi aktif.
+- Affiliator yang **belum** menandatangani tidak dapat membuka Dashboard, Tenant Referral, Komisi, atau Pembayaran.
+
+**Panduan langkah demi langkah — menandatangani S&K**
+1. Login di `/login` dengan email portal affiliator.
+2. Jika S&K versi terbaru belum ditandatangani, Anda diarahkan ke **Persetujuan Syarat & Ketentuan** (tanpa sidebar — tidak ada cara navigasi ke modul lain).
+3. Baca peringatan: *“Baca sampai selesai sebelum menyetujui”*.
+4. Jika Anda sebelumnya menandatangani versi lama, banner biru menjelaskan bahwa S&K telah diperbarui dan versi baru wajib ditandatangani.
+5. **Gulir dokumen** di panel tengah sampai bagian *“Anda telah mencapai akhir dokumen”*.
+   - Kotak centang persetujuan **terkunci** sampai gulir selesai.
+   - Gunakan **Lompat ke akhir** jika dokumen panjang.
+   - Setelah selesai, badge hijau **Selesai dibaca** muncul.
+6. Centang: *“Saya telah membaca, memahami, dan menyetujui seluruh Syarat & Ketentuan Program Affiliator versi X…”*
+7. Isi **Nama lengkap penandatangan** (sesuai identitas resmi; default dari nama profil jika ada).
+8. **Tanda tangan digital**: gambar di kotas tanda tangan dengan mouse atau sentuhan; kosongkan dan gambar ulang jika perlu.
+9. Klik **Setuju & Tandatangani**.
+10. Setelah sukses, Anda diarahkan ke **Dashboard Affiliator** (`/affiliate`).
+
+**Data yang dicatat sistem (jejak audit)**
+| Data | Kegunaan |
+|------|----------|
+| Versi dokumen & hash konten | Memastikan affiliator menandatangani teks persis yang Published |
+| Nama penandatangan | Identitas yang mengikat secara hukum |
+| Gambar tanda tangan (PNG base64) | Bukti visual persetujuan |
+| Waktu persetujuan | Timestamp server |
+| Alamat IP & user agent | Jejak perangkat (jika tersedia) |
+
+**Setelah menandatangani**
+- **Profil** (`/affiliate/profile`) → kartu **Syarat & Ketentuan yang disetujui** menampilkan judul, versi, tanggal, dan nama penandatangan.
+- Tautan **Baca S&K Program Affiliator** membuka halaman publik `/affiliate-terms` (baca-saja, tanpa login).
+
+**Tangkapan layar**
+  - ![Portal — Persetujuan S&K](./assets/affiliate-portal-accept-terms.png)
+  - ![Portal — Profil (S&K disetujui)](./assets/affiliate-portal-profile.png)
+
+---
+
+#### Modul: Halaman publik S&K Affiliator
+- **Nama fitur**: **S&K Program Affiliator (publik)**
+- **Rute**: `/affiliate-terms`
+- **Deskripsi**: Halaman **baca-saja** untuk calon mitra atau affiliator yang ingin membaca S&K tanpa login. Menampilkan versi **Published** terbaru dari database. Tidak menggantikan proses tanda tangan di `/affiliate/accept-terms`.
+- **Panduan**
+  1. Buka `https://[domain]/affiliate-terms` (atau dari tautan di profil affiliator).
+  2. Konten ditampilkan dalam format yang sama seperti pada gerbang persetujuan (Markdown dirender).
+  3. Jika admin belum Publish, halaman menampilkan bahwa dokumen belum tersedia.
+- **Tangkapan layar**
+  - ![Halaman publik — S&K Affiliator](./assets/affiliate-public-terms.png)
+
+---
+
 #### Modul: Portal Affiliator — Dashboard
 - **Nama fitur**: **Dashboard Affiliator**
 - **Rute**: `/affiliate`
@@ -181,6 +295,7 @@ flowchart LR
 - **Nama fitur**: **Profil & Rekening**
 - **Rute**: `/affiliate/profile`
 - **Deskripsi**: Affiliator dapat memperbarui rekening bank, e-wallet, alamat, dan NPWP. Nama, email, rate komisi, dan status **hanya dapat diubah oleh superadmin**.
+- **Bagian S&K yang disetujui**: Kartu **Syarat & Ketentuan yang disetujui** menampilkan dokumen aktif yang telah ditandatangani (judul, versi, tanggal, nama penandatangan). Jika versi baru dipublikasikan tetapi belum ditandatangani, affiliator tidak dapat membuka profil sampai menyelesaikan `/affiliate/accept-terms`.
 - **Tangkapan layar**
   - ![Portal — Profil & rekening](./assets/affiliate-portal-profile.png)
 
@@ -200,9 +315,20 @@ flowchart TD
         A6 -- Tidak --> A8[Saldo digulung]
     end
     subgraph Partner["Portal Affiliator"]
-        P1[Login → Dashboard] --> P2[Salin kode referral]
+        P0[Login] --> P0a{S&K versi terbaru sudah ditandatangani?}
+        P0a -- Tidak --> P0b[Gulir sampai akhir dokumen]
+        P0b --> P0c[Centang + nama + tanda tangan digital]
+        P0c --> P0d[Setuju & Tandatangani]
+        P0d --> P1[Dashboard]
+        P0a -- Ya --> P1
+        P1 --> P2[Salin kode referral]
         P2 --> P3[Pantau tenant & komisi]
         P3 --> P4[Cek riwayat pembayaran]
+    end
+    subgraph Legal["S&K Affiliator (Superadmin)"]
+        L1[Buat Draft Markdown] --> L2[Preview & Publish vN]
+        L2 --> L3{Versi baru?}
+        L3 -- Ya --> P0a
     end
     A1 -.-> P1
     A7 -.-> P4
@@ -217,7 +343,10 @@ flowchart TD
 | Daftar / buat affiliator | ✅ | ❌ | ❌ |
 | Batch pembayaran komisi | ✅ | ❌ (hanya lihat milik sendiri) | ❌ |
 | Kode referral pada buat tenant | ✅ | ❌ | ❌ |
-| Portal `/affiliate/*` | ❌ | ✅ | ❌ |
+| Portal `/affiliate/*` | ❌ | ✅ (setelah S&K ditandatangani) | ❌ |
+| Halaman publik `/affiliate-terms` | ✅ | ✅ (tanpa login) | ✅ (tanpa login) |
+| Edit & publish S&K Affiliator | ✅ | ❌ (hanya baca + tanda tangan) | ❌ |
+| Tanda tangan S&K Affiliator | ❌ | ✅ | ❌ |
 | Ubah rate komisi sendiri | ❌ | ❌ | ❌ |
 | Ubah rekening payout sendiri | ✅ (semua) | ✅ (milik sendiri) | ❌ |
 
@@ -246,6 +375,27 @@ A: Tidak ada komisi baru; login portal diblokir. Komisi `Pending` yang sudah ada
 **Q: Affiliator tidak bisa login — pesan login gagal?**
 A: Periksa status affiliator (harus **Aktif**) dan pastikan menggunakan email portal affiliator, bukan akun tenant.
 
+**Q: Setelah login, affiliator tidak bisa masuk dashboard?**
+A: Jika S&K Program Affiliator sudah dipublikasikan, affiliator wajib membaca sampai akhir, mencentang, mengetik nama, dan menandatangani di `/affiliate/accept-terms`. Superadmin memublikasikan dokumen di **Dokumen Legal** (`/admin/legal`).
+
+**Q: Superadmin mengubah S&K — apakah affiliator lama tetap bisa masuk?**
+A: **Tidak**, setelah versi baru **dipublikasikan**. Affiliator yang menandatangani versi lama harus menandatangani ulang versi terbaru sebelum portal terbuka kembali. Tanda tangan versi lama tetap ada di riwayat audit.
+
+**Q: Bisa mengedit S&K yang sudah Published?**
+A: **Tidak.** Versi Published bersifat immutable. Buat **Draft baru** (versi berikutnya), sunting, lalu **Publish** lagi.
+
+**Q: Pratinjau Markdown kosong di admin legal?**
+A: Pastikan konten sudah disimpan di Draft. Gunakan tombol **Preview** — textarea disembunyikan tetapi form tetap memuat data. Jika textarea kosong, paste ulang Markdown dan **Simpan** sebelum Preview.
+
+**Q: Affiliator bisa melewati gerbang S&K dengan URL langsung?**
+A: **Tidak.** Meskipun UI tidak menampilkan sidebar, API portal mengembalikan `403 AFFILIATE_TERMS_REQUIRED` sampai versi Published terbaru ditandatangani.
+
+**Q: Belum ada S&K Published — affiliator terkunci?**
+A: **Tidak.** Jika admin belum mempublikasikan S&K, portal affiliator tetap dapat diakses (tidak ada gerbang). Setelah Publish, gerbang aktif untuk semua affiliator yang belum menandatangani versi aktif.
+
+**Q: Di mana superadmin melihat tanda tangan affiliator?**
+A: Di **Affiliator → Detail** → kartu **Riwayat persetujuan S&K** (nama, versi, tanggal, gambar tanda tangan).
+
 ---
 
 ### 9. Glosarium
@@ -253,6 +403,12 @@ A: Periksa status affiliator (harus **Aktif**) dan pastikan menggunakan email po
 | Istilah | Definisi |
 |---------|----------|
 | **Affiliator** | Mitra yang merekrut tenant dan memperoleh komisi |
+| **S&K Affiliator** | Syarat & Ketentuan Program Affiliator; diedit di `/admin/legal`, wajib ditandatangani di portal |
+| **Gerbang S&K** | Alur wajib di `/affiliate/accept-terms` sebelum portal terbuka |
+| **Tanda tangan digital** | Gambar PNG yang affiliator menggambar di portal; disimpan bersama nama dan versi dokumen |
+| **Versi dokumen** | Nomor versi (v1, v2, …) setiap kali Draft S&K Affiliator dipublikasikan |
+| **Content hash** | Sidik jari konten Published; memastikan tanda tangan mengikat teks persis yang aktif |
+| **Riwayat persetujuan S&K** | Daftar semua tanda tangan affiliator per versi; tampil di detail affiliator (admin) |
 | **Kode referral** | Kode unik (mis. `DENDI-HF`) untuk menghubungkan tenant ke affiliator |
 | **Rate komisi** | Persentase dari total tagihan langganan tenant |
 | **Komisi Pending** | Sudah diperoleh dari invoice dibayar, belum masuk batch |

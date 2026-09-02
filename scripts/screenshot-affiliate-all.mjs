@@ -56,6 +56,45 @@ async function getAffiliateId(adminToken) {
   return id;
 }
 
+async function getAffiliateTermsLegalDoc(adminToken) {
+  const res = await fetch(
+    `${API}/admin/legal-documents?type=AFFILIATE_TERMS&limit=5`,
+    { headers: { Authorization: `Bearer ${adminToken}` } },
+  );
+  const json = await res.json();
+  const items = json.data?.items ?? [];
+  const published = items.find((d) => d.status === "PUBLISHED");
+  const draft = items.find((d) => d.status === "DRAFT");
+  return published ?? draft ?? items[0] ?? null;
+}
+
+const MIN_SIGNATURE_PNG =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAFklEQVR42mP8z5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+
+async function getAffiliateTermsStatus(affiliateToken) {
+  const res = await fetch(`${API}/affiliate/me/terms`, {
+    headers: { Authorization: `Bearer ${affiliateToken}` },
+  });
+  const json = await res.json();
+  return json.data ?? null;
+}
+
+async function acceptTermsViaApi(affiliateToken, termsStatus) {
+  if (!termsStatus?.acceptanceRequired || !termsStatus.document) return;
+  await fetch(`${API}/affiliate/me/terms/accept`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${affiliateToken}`,
+    },
+    body: JSON.stringify({
+      signerName: "Manual Screenshot",
+      signatureData: MIN_SIGNATURE_PNG,
+      documentVersion: termsStatus.document.version,
+    }),
+  });
+}
+
 async function savePng(buffer, filename) {
   const out = await sharp(buffer)
     .resize(1024, null, { withoutEnlargement: true })
@@ -211,6 +250,61 @@ async function main() {
   await hideDevUi(page);
   await viewportShot(page, "affiliate-admin-tenant-referral.png");
 
+  console.log("Admin — legal documents list");
+  await gotoAndWait(page, "/admin/legal");
+  await page.waitForFunction(
+    () => document.body.innerText.includes("Dokumen Legal"),
+    { timeout: 30000 },
+  );
+  await viewportShot(page, "affiliate-admin-legal-list.png");
+
+  const legalDoc = await getAffiliateTermsLegalDoc(admin.tokens.accessToken);
+  if (legalDoc?.id) {
+    console.log("Admin — legal document detail");
+    await gotoAndWait(page, `/admin/legal/${legalDoc.id}`);
+    await page.waitForFunction(
+      () =>
+        document.body.innerText.includes("Metadata") ||
+        document.body.innerText.includes("Konten"),
+      { timeout: 30000 },
+    );
+    await viewportShot(page, "affiliate-admin-legal-detail.png");
+  }
+
+  console.log("Admin — affiliate terms acceptance history");
+  await gotoAndWait(page, `/admin/affiliates/${affiliateId}`);
+  await page.waitForFunction(
+    () => document.body.innerText.includes("Riwayat persetujuan"),
+    { timeout: 30000 },
+  );
+  await page.evaluate(() => {
+    const headings = [...document.querySelectorAll("h2, h3, p, span, div")];
+    const target = headings.find((el) =>
+      el.textContent?.includes("Riwayat persetujuan S&K"),
+    );
+    if (target) target.scrollIntoView({ block: "start" });
+  });
+  await new Promise((r) => setTimeout(r, 800));
+  await hideDevUi(page);
+  await viewportShot(page, "affiliate-admin-terms-history.png");
+
+  console.log("Public — affiliate terms page");
+  const publicPage = await browser.newPage();
+  await publicPage.setViewport({ width: 1280, height: 800, deviceScaleFactor: 1 });
+  await gotoAndWait(publicPage, "/affiliate-terms");
+  await publicPage.waitForFunction(
+    () =>
+      document.body.innerText.includes("Affiliator") ||
+      document.body.innerText.includes("belum tersedia"),
+    { timeout: 30000 },
+  );
+  const publicRaw = await publicPage.screenshot({
+    type: "png",
+    captureBeyondViewport: false,
+  });
+  await savePng(publicRaw, "affiliate-public-terms.png");
+  await publicPage.close();
+
   // ── Portal screenshots (new browser context for clean cookies) ──────────
   const portalPage = await browser.newPage();
   await portalPage.setViewport({ width: 1280, height: 800, deviceScaleFactor: 1 });
@@ -218,6 +312,28 @@ async function main() {
     isAdmin: false,
     isAffiliate: true,
   });
+
+  const termsStatus = await getAffiliateTermsStatus(affiliate.tokens.accessToken);
+  if (termsStatus?.acceptanceRequired) {
+    console.log("Portal — accept terms (acceptance required)");
+    await gotoAndWait(portalPage, "/affiliate/accept-terms");
+    await portalPage.waitForFunction(
+      () =>
+        document.body.innerText.includes("Persetujuan Syarat") ||
+        document.body.innerText.includes("Baca sampai selesai"),
+      { timeout: 30000 },
+    );
+    const acceptRaw = await portalPage.screenshot({
+      type: "png",
+      captureBeyondViewport: false,
+    });
+    await savePng(acceptRaw, "affiliate-portal-accept-terms.png");
+    await acceptTermsViaApi(affiliate.tokens.accessToken, termsStatus);
+  } else {
+    console.log(
+      "Portal — skip accept-terms screenshot (already signed current version)",
+    );
+  }
 
   const portalShots = [
     {
